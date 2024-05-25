@@ -1,0 +1,301 @@
+
+package worker;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import javax.swing.*;
+
+public class NewProfessor extends JFrame {
+
+    public NewProfessor() {
+        setTitle("교수 등록");
+
+        JLabel title = new JLabel("교수 정보 등록", JLabel.CENTER);
+        title.setForeground(new Color(5, 0, 153));
+        title.setFont(new Font("굴림", Font.BOLD, 30));
+
+        JButton join = new JButton("교수등록");
+        JButton cancel = new JButton("취소");
+
+        JTextField id = new JTextField(10);
+        JTextField pw = new JTextField(10);
+        JTextField name = new JTextField(10);
+        JTextField phone = new JTextField(10);
+        JTextField email = new JTextField(10);
+        JTextField department = new JTextField(10);
+
+        // Form panels
+        JPanel idPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        idPanel.add(new JLabel("아이디 : "));
+        idPanel.add(id);
+
+        JPanel pwdPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pwdPanel.add(new JLabel("비밀번호 : "));
+        pwdPanel.add(pw);
+
+        JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        namePanel.add(new JLabel("이    름 : "));
+        namePanel.add(name);
+
+        JPanel phonePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        phonePanel.add(new JLabel("연 락 처 : "));
+        phonePanel.add(phone);
+
+        JPanel emailPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        emailPanel.add(new JLabel("이메일 : "));
+        emailPanel.add(email);
+
+        JPanel departPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        departPanel.add(new JLabel("학 과: "));
+        departPanel.add(department);
+
+        JPanel formPanel = new JPanel(new GridLayout(6, 1));
+        formPanel.add(idPanel);
+        formPanel.add(pwdPanel);
+        formPanel.add(namePanel);
+        formPanel.add(phonePanel);
+        formPanel.add(emailPanel);
+        formPanel.add(departPanel);
+
+        // Button panel
+        JPanel panel = new JPanel();
+        panel.add(join);
+        panel.add(cancel);
+
+        // Content panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(formPanel, BorderLayout.CENTER);
+
+        add(title, BorderLayout.NORTH);
+        add(contentPanel, BorderLayout.CENTER);
+        add(panel, BorderLayout.SOUTH);
+
+        setBounds(200, 200, 400, 400);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+
+        // Event handling
+        join.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String Id = id.getText();
+                String Pw = pw.getText();
+                String Name = name.getText();
+                String Phone = phone.getText();
+                String Email = email.getText();
+                String Department = department.getText();
+
+                try (Connection conn = DriverManager.getConnection(
+                        "jdbc:mysql://localhost/DB2024Team04", "root", "root");
+                     PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO DB2024_Professor (id, name, department, email, phone, password) VALUES (?, ?, ?, ?, ?, ?)")) {
+                    
+                    stmt.setInt(1, Integer.parseInt(Id));
+                    stmt.setString(2, Name);
+                    stmt.setString(3, Department);
+                    stmt.setString(4, Email);
+                    stmt.setString(5, Phone);
+                    stmt.setString(6, Pw);
+
+                    int i = stmt.executeUpdate();
+                    if (i > 0) {
+                        JOptionPane.showMessageDialog(null, "교수등록완료");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "교수등록실패");
+                    }
+                } catch (SQLException sqle) {
+                    sqle.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "SQLException: " + sqle.getMessage());
+                }
+            }
+        });
+
+        cancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        new NewProfessor();
+    }
+}
+
+
+
+
+
+/*
+package worker;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.swing.*;
+
+import professor.StartProfessor;
+
+public class NewProfessor extends JFrame {
+
+	String choice = null;
+	String sql_query="";
+	public NewProfessor() {
+		
+		setTitle("교수 등록");
+		
+
+		JLabel title = 
+			new JLabel("교수 정보 등록", JLabel.CENTER);
+		
+		title.setForeground(new Color(5, 0, 153));
+		title.setFont(new Font("굴림", Font.BOLD, 30));
+		
+		JButton join = new JButton("교수등록");
+		JButton cancel = new JButton("취소");
+		
+		JTextField id = new JTextField(10);
+		JTextField pw = new JTextField(10);
+		JTextField name = new JTextField(10);
+		JTextField phone = new JTextField(10);
+		JTextField email = new JTextField(10);
+		JTextField departure = new JTextField(10);
+		
+		JRadioButton client = new JRadioButton("고객");
+		JRadioButton manager = new JRadioButton("관리자");
+		JRadioButton etc = new JRadioButton("기타");
+		
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(client); bg.add(manager); bg.add(etc);
+		
+		
+		
+		// form panel
+		JPanel idPanel = new JPanel();
+		idPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		idPanel.add(new JLabel("아이디 : "));
+		idPanel.add(id);
+		
+		
+		JPanel pwdPanel = new JPanel();
+		pwdPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		pwdPanel.add(new JLabel("비밀번호 : "));
+		pwdPanel.add(pw);
+		
+		
+		JPanel namePanel = new JPanel();
+		namePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		namePanel.add(new JLabel("이    름 : "));
+		namePanel.add(name);
+		
+		
+		JPanel phonePanel = new JPanel();
+		phonePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		phonePanel.add(new JLabel("연 락 처 : "));
+		phonePanel.add(phone);
+		
+		JPanel emailPanel = new JPanel();
+		phonePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		phonePanel.add(new JLabel("이메일 : "));
+		phonePanel.add(email);
+		
+		JPanel departPanel = new JPanel();
+		phonePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		phonePanel.add(new JLabel("학 과: "));
+		phonePanel.add(departure);
+		
+		
+		JPanel formPanel = new JPanel();
+		formPanel.setLayout(new GridLayout(4, 1));
+		formPanel.add(idPanel);
+		formPanel.add(pwdPanel);
+		formPanel.add(namePanel);
+		formPanel.add(phonePanel);
+		
+		// radio + form panel
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new FlowLayout());
+		
+		contentPanel.add(formPanel);
+		
+		// button panel
+		JPanel panel = new JPanel();
+		panel.add(join);
+		panel.add(cancel);
+		
+		
+		add(title, BorderLayout.NORTH);
+		add(contentPanel, BorderLayout.CENTER);
+		add(panel, BorderLayout.SOUTH);
+		
+		
+		setBounds(200, 200, 250, 300);
+		
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		setVisible(true);
+		
+		
+		// 이벤트 처리
+		join.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				String Id = id.getText();
+				int numId = Integer.parseInt(Id);
+				System.out.println(numId);
+				String Pw = pw.getText();
+				String Name = name.getText();
+				String Phone = phone.getText();
+				String Email = email.getText();
+				String Departure = departure.getText();
+				try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/DB2024Team04", "root", "root");
+						 Statement stmt = conn.createStatement(); ){
+					sql_query=String.format("insert into DB2024_Professor values(%d,'%s','%s','%s','%s','%s');",numId,Name,Departure,Email,Phone,Pw);
+					int i =stmt.executeUpdate(sql_query);
+					
+						 }
+						 catch (SQLException sqle) {
+						 System.out.println("SQLException : " + sqle);
+						 }
+				
+				
+				
+				
+				JOptionPane.showMessageDialog
+					(null,"교수등록완료");
+				
+			}
+		});
+		
+		
+		// 취소 버튼을 클릭했을 때 이벤트 처리
+		cancel.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				new ProfessorManagement();
+				dispose();
+				
+			}
+		});
+	}
+}*/

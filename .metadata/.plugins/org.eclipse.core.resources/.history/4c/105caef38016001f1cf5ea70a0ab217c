@@ -1,0 +1,151 @@
+package student;
+
+import java.awt.EventQueue;
+import java.util.*;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+
+import java.sql.*;
+
+public class ProfessorViewStudent extends JFrame{
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JPanel panel;
+	private JLabel title;
+	private JButton btnSearch;
+	private JTextField searchTextField;
+	private JButton homeButton;
+	private JComboBox comboBox;
+	private JTable table;
+
+	public static StudentStart start_frame = null;
+
+
+	public ProfessorViewStudent() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 800, 543);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+
+		panel = new JPanel();
+		panel.setBounds(12, 6, 771, 492);
+		contentPane.add(panel);
+		panel.setLayout(null);
+
+		title = new JLabel("교수 조회");
+		title.setFont(new Font("Lucida Grande", Font.PLAIN, 27));
+		title.setBounds(332, 24, 129, 55);
+		panel.add(title);
+
+		searchTextField = new JTextField("교수명 or 교수id or 학과를 입력하세요");
+		searchTextField.setBounds(214, 97, 344, 26);
+		panel.add(searchTextField);
+		searchTextField.setColumns(10);
+
+		btnSearch = new JButton("검색");
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+		btnSearch.setBounds(554, 97, 58, 29);
+		panel.add(btnSearch);
+
+		homeButton = new JButton("home");
+		homeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				start_frame = new StudentStart();
+				start_frame.setVisible(true);
+				setVisible(false);
+			}
+		});
+		homeButton.setFont(new Font("Lucida Grande", Font.PLAIN, 12));
+		homeButton.setBounds(6, 6, 63, 29);
+		panel.add(homeButton);
+
+		comboBox = new JComboBox<>();
+		String[] options = { "교수명", "교수id", "학과" };
+		comboBox.setModel(new DefaultComboBoxModel<>(options));
+		comboBox.setSelectedItem("교수명"); // 기본 선택
+		comboBox.setBounds(101, 98, 101, 27);
+		panel.add(comboBox);
+
+		table = new JTable();
+		table.setBounds(50, 150, 700, 300);
+		panel.add(table);
+		//
+		 
+		 String sql_query1 = String.format("create view ProfessorViewStudentas select  ProfessorID,Name,Department,Email,Phonefrom DB2024_Professor ;");
+		 String sql_query2="";
+		 
+		 switch (comboBox.getSelectedIndex()){
+		 case 0:
+		      sql_query2 = String.format("select  * from ProfessorViewStudent where Name='%s';",searchTextField.getText());
+
+		 break;
+		 
+		 case 1:
+		      sql_query2 = String.format("select  *from ProfessorViewStudent where ProfessorID ='%s';",searchTextField.getText());
+
+		 break;
+		 
+		 case 2:
+		      sql_query2 = String.format("select  *from ProfessorViewStudent where 학과='%s';",searchTextField.getText());
+
+		 break;
+		 
+		 
+		 }//switch
+		 Vector<Object> data = new Vector<Object>();
+		 
+		 try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/DB2024Team04", "root", "root");
+						 Statement stmt = conn.createStatement(); )
+						 {
+						 
+						
+						 //검색 쿼리
+
+						 
+						 ResultSet rset1 = stmt.executeQuery(sql_query1);
+						 ResultSet rset2 = stmt.executeQuery(sql_query2);
+						 
+						 if(rset2.next()){
+						 while( rset2.next()) {
+						 data.add(rset2.getInt(1));
+						 data.add(rset2.getString(2));
+						 data.add(rset2.getString(3));
+						 data.add(rset2.getString(4));
+						 data.add (rset2.getString(5));
+													                                
+						 }	//while
+						 				  
+						 }//if
+						 else data.add("검색결과 없음");
+						 }//try
+						 
+						 catch (SQLException sqle) {
+						 System.out.println("SQLException : " + sqle);
+						 }//catch
+
+
+		 
+		 
+		
+	//	
+	}//professor view
+}//class
